@@ -59,13 +59,13 @@ public class AdminController {
             if (email == null || email.isBlank()) continue;
             UserRow row = reportStats.get(email);
             if (row == null) {
-                row = new UserRow(email, safe(r.getUserName()), 0, 0, 0, null, r.getCreatedAt());
+                row = new UserRow(email, safe(r.getUserName()), 0, 0, 0, null, null, r.getCreatedAt());
             }
             int total = row.totalReports + 1;
             int pending = row.pendingReports + ("PENDING".equalsIgnoreCase(r.getStatus()) ? 1 : 0);
             int resolved = row.resolvedReports + ("RESOLVED".equalsIgnoreCase(r.getStatus()) ? 1 : 0);
             LocalDateTime lastReportAt = max(row.lastReportAt, r.getCreatedAt());
-            reportStats.put(email, new UserRow(email, row.displayName, total, pending, resolved, null, lastReportAt));
+            reportStats.put(email, new UserRow(email, row.displayName, total, pending, resolved, null, null, lastReportAt));
         }
 
         List<UserRow> rows = users.stream().map(u -> {
@@ -84,7 +84,7 @@ public class AdminController {
                     u.getLastLoginAt(),
                     stats != null ? stats.lastReportAt : null
             );
-        }).stream().sorted(Comparator
+        }).sorted(Comparator
                 .comparing(UserRow::lastLoginAt, Comparator.nullsLast(Comparator.reverseOrder()))
                 .thenComparing(UserRow::createdAt, Comparator.nullsLast(Comparator.reverseOrder()))
         ).toList();

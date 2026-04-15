@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Report waste</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous"/>
+  <link rel="stylesheet" th:href="@{/css/app.css}"/>
+</head>
+<body>
+<div class="mobile-app-shell min-vh-100">
+  <main class="px-3 pb-4">
+    <div class="report-headerbar">
+      <a class="btn btn-outline-dark btn-mobile-secondary report-track-btn" th:href="@{/report/track}" href="/report/track">Track requests</a>
+    </div>
+
+    <div class="success-backdrop" id="successModal" th:classappend="${submitted} ? ' open' : ''"
+         role="dialog" aria-modal="true" aria-labelledby="successTitle" aria-describedby="successBody">
+      <div class="success-modal">
+        <div class="success-icon" aria-hidden="true">✓</div>
+        <h3 class="success-title" id="successTitle">Thanks — report submitted</h3>
+        <p class="success-body" id="successBody">
+          We’ve received your request. You can track status anytime from “Track requests”.
+        </p>
+        <button type="button" class="btn btn-success w-100 btn-mobile-lg" id="closeSuccessBtn">Done</button>
+      </div>
+    </div>
+
+    <form th:action="@{/report}" th:object="${report}" method="post" enctype="multipart/form-data" class="needs-validation" novalidate>
+      <div class="card mobile-card mb-4">
+        <div class="card-body p-4">
+          <label class="form-label fw-semibold text-secondary small text-uppercase">What did you see?</label>
+          <textarea th:field="*{description}" class="form-control form-control-lg rounded-4" rows="4" required></textarea>
+        </div>
+      </div>
+
+      <div class="card mobile-card mb-4">
+        <div class="card-body p-4">
+          <label class="form-label fw-semibold text-secondary small text-uppercase">Upload photo</label>
+          <input name="imageFile" type="file" accept="image/*" class="form-control form-control-lg rounded-4" required/>
+        </div>
+      </div>
+
+      <div class="card mobile-card mb-4">
+        <div class="card-body p-4">
+          <label class="form-label fw-semibold text-secondary small text-uppercase">Location</label>
+          <div class="row g-2">
+            <div class="col-6">
+              <input th:field="*{latitude}" type="number" step="any" class="form-control form-control-lg rounded-4" id="lat" required/>
+            </div>
+            <div class="col-6">
+              <input th:field="*{longitude}" type="number" step="any" class="form-control form-control-lg rounded-4" id="lng" required/>
+            </div>
+          </div>
+          <button type="button" class="btn btn-outline-secondary w-100 mt-3 btn-mobile-secondary" id="useLocationBtn">
+            Use my current location
+          </button>
+        </div>
+      </div>
+
+      <button type="submit" class="btn btn-success w-100 btn-mobile-lg mb-3">Submit report</button>
+    </form>
+
+    <section class="report-tips" aria-label="Reporting tips">
+      <ul class="report-tips-list mb-0">
+        <li>Add a short description (what + how much).</li>
+        <li>Upload a clear photo from close range.</li>
+        <li>Use current location for faster pickup.</li>
+        <li>Track status anytime from “Track requests”.</li>
+      </ul>
+    </section>
+  </main>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+        crossorigin="anonymous"></script>
+<script>
+  (function () {
+    const form = document.querySelector('.needs-validation');
+    if (form) {
+      form.addEventListener('submit', function (e) {
+        if (!form.checkValidity()) {
+          e.preventDefault();
+          e.stopPropagation();
+        }
+        form.classList.add('was-validated');
+      });
+    }
+    const btn = document.getElementById('useLocationBtn');
+    const lat = document.getElementById('lat');
+    const lng = document.getElementById('lng');
+    if (btn && navigator.geolocation) {
+      const defaultBtnText = btn.textContent.trim();
+      btn.addEventListener('click', function () {
+        btn.disabled = true;
+        btn.textContent = 'Please wait...';
+        navigator.geolocation.getCurrentPosition(
+          function (pos) {
+            lat.value = pos.coords.latitude.toFixed(6);
+            lng.value = pos.coords.longitude.toFixed(6);
+            btn.disabled = false;
+            btn.textContent = defaultBtnText;
+          },
+          function () {
+            btn.disabled = false;
+            btn.textContent = defaultBtnText;
+            alert('Could not read location. Enter coordinates manually.');
+          }
+        );
+      });
+    } else if (btn) {
+      btn.addEventListener('click', function () {
+        alert('Geolocation is not supported in this browser.');
+      });
+    }
+  })();
+</script>
+<script>
+  (function () {
+    const modal = document.getElementById('successModal');
+    const closeBtn = document.getElementById('closeSuccessBtn');
+    if (!modal || !closeBtn) return;
+    function close() {
+      modal.classList.remove('open');
+    }
+    closeBtn.addEventListener('click', close);
+    modal.addEventListener('click', function (e) {
+      if (e.target === modal) close();
+    });
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && modal.classList.contains('open')) close();
+    });
+  })();
+</script>
+</body>
+</html>

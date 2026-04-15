@@ -1,0 +1,446 @@
+/* User reporting — mobile app shell */
+.mobile-app-shell {
+  max-width: 440px;
+  margin-left: auto;
+  margin-right: auto;
+  background: #ffffff;
+  display: flex;
+  justify-content: center;
+}
+
+.mobile-app-header {
+  background: linear-gradient(135deg, #0d9488 0%, #0f766e 100%);
+  color: #fff;
+  border-radius: 0 0 1.5rem 1.5rem;
+  box-shadow: 0 4px 24px rgba(15, 118, 110, 0.35);
+}
+
+.btn-mobile-lg {
+  min-height: 2.9rem;
+  font-size: 1rem;
+  font-weight: 600;
+  border-radius: 0.75rem;
+}
+
+.btn-mobile-secondary {
+  min-height: 2.5rem;
+  font-size: 0.92rem;
+  border-radius: 0.75rem;
+}
+
+.mobile-card {
+  border-radius: 1rem;
+  border: none;
+  box-shadow: 0 8px 30px rgba(15, 23, 42, 0.08);
+}
+
+.mobile-app-shell main {
+  max-width: 760px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.mobile-card .card-body {
+  padding: 1.15rem 1.2rem !important;
+}
+
+.mobile-app-shell .form-label {
+  font-size: 0.72rem;
+}
+
+.mobile-app-shell .form-text {
+  font-size: 0.78rem;
+}
+
+.mobile-app-shell .form-control,
+.mobile-app-shell .form-control::placeholder {
+  font-size: 0.92rem;
+}
+
+.mobile-app-shell .form-control {
+  border: 1.5px solid #cbd5e1;
+  background: #ffffff;
+  color: #0f172a;
+}
+
+.mobile-app-shell .form-control:hover {
+  border-color: #94a3b8;
+}
+
+.mobile-app-shell .form-control:focus {
+  border-color: #0f766e;
+  box-shadow: 0 0 0 0.18rem rgba(15, 118, 110, 0.18);
+}
+
+.mobile-app-shell .btn-mobile-secondary {
+  border: 1.5px solid #0f766e;
+  background: #f0fdfa;
+  color: #115e59;
+  font-weight: 600;
+}
+
+.mobile-app-shell .btn-mobile-secondary:hover {
+  background: #ccfbf1;
+  border-color: #0f766e;
+  color: #134e4a;
+}
+
+.mobile-app-shell .btn-mobile-secondary:focus {
+  box-shadow: 0 0 0 0.18rem rgba(15, 118, 110, 0.2);
+}
+
+.form-control-lg.rounded-4 {
+  border-radius: 0.75rem !important;
+}
+
+.report-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.6rem;
+}
+
+.report-headerbar {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  background: #ffffff;
+  margin: 0 -1rem 1rem;
+  padding: 0.85rem 1rem;
+  border-bottom: 1px solid #e2e8f0;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+}
+
+.track-headerbar {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  background: #ffffff;
+  margin: 0 -1rem 1rem;
+  padding: 0.85rem 1rem;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.report-track-btn {
+  flex: 0 0 auto;
+  white-space: nowrap;
+  min-height: 2.2rem !important;
+  font-size: 0.82rem !important;
+  border-color: #cbd5e1 !important;
+}
+
+.report-tips {
+  margin-top: 1.35rem;
+  padding: 0.75rem 0.25rem 0;
+  display: flex;
+  justify-content: center;
+}
+
+.report-tips-list {
+  margin: 0;
+  width: min(420px, 100%);
+  padding-left: 0;
+  list-style: none;
+  color: #475569;
+  font-size: 0.82rem;
+  line-height: 1.5;
+  display: grid;
+  gap: 0.35rem;
+  text-align: center;
+}
+
+.report-tips-list li::before {
+  content: "• ";
+  color: #94a3b8;
+}
+
+.success-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.32);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  z-index: 60;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity 220ms ease, visibility 220ms ease;
+  backdrop-filter: blur(2px);
+}
+
+.success-backdrop.open {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+}
+
+.success-modal {
+  width: min(420px, 94vw);
+  background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+  border: 1px solid #e2e8f0;
+  border-radius: 18px;
+  box-shadow: 0 26px 60px rgba(15, 23, 42, 0.28);
+  padding: 22px 18px 18px;
+  text-align: center;
+  transform: translateY(14px) scale(0.985);
+  opacity: 0;
+  transition: transform 220ms cubic-bezier(.2, .8, .2, 1), opacity 220ms ease;
+}
+
+.success-backdrop.open .success-modal {
+  transform: translateY(0) scale(1);
+  opacity: 1;
+}
+
+.success-icon {
+  width: 56px;
+  height: 56px;
+  margin: 0 auto 12px;
+  border-radius: 50%;
+  background: #f0fdf4;
+  border: 1px solid #86efac;
+  color: #166534;
+  display: grid;
+  place-items: center;
+  font-weight: 900;
+  font-size: 22px;
+}
+
+.success-title {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 900;
+  color: #0f172a;
+  letter-spacing: 0.01em;
+}
+
+.success-body {
+  margin: 10px 0 16px;
+  font-size: 0.88rem;
+  color: #475569;
+  line-height: 1.45;
+}
+
+.track-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.7rem;
+}
+
+.track-title {
+  font-size: 1.02rem;
+  font-weight: 800;
+  color: #0f172a;
+  letter-spacing: 0.01em;
+}
+
+.track-subtitle {
+  font-size: 0.82rem;
+  color: #64748b;
+}
+
+.track-card {
+  border-left: 3px solid #cbd5e1;
+}
+
+.track-desc {
+  font-size: 0.92rem;
+  line-height: 1.4;
+  max-width: 72%;
+}
+
+.track-status {
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  border-radius: 999px;
+  padding: 0.25rem 0.55rem;
+}
+
+.status-pending {
+  color: #92400e;
+  background: #fffbeb;
+  border: 1px solid #fde68a;
+}
+
+.status-resolved {
+  color: #166534;
+  background: #f0fdf4;
+  border: 1px solid #86efac;
+}
+
+.track-meta-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.65rem;
+  margin-top: 0.3rem;
+}
+
+.track-label {
+  display: inline-block;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  color: #64748b;
+  text-transform: uppercase;
+}
+
+.track-value {
+  font-size: 0.82rem;
+  color: #0f172a;
+}
+
+/* Android/mobile centering for report page */
+@media (max-width: 576px) {
+  .mobile-app-shell {
+    max-width: 100%;
+    min-height: 100vh;
+    align-items: stretch;
+    padding: 0;
+  }
+
+  .report-topbar {
+    flex-wrap: wrap;
+  }
+
+  .report-track-btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .mobile-app-shell main {
+    width: 100%;
+    max-width: 100%;
+    margin: 0;
+    padding: 0.9rem !important;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .mobile-app-shell .needs-validation {
+    width: 100%;
+  }
+
+  .mobile-app-shell .mobile-card {
+    margin-bottom: 0.85rem !important;
+  }
+
+  .mobile-app-shell .btn-mobile-lg {
+    margin-top: 0.2rem;
+    margin-bottom: 0 !important;
+  }
+
+  .track-desc {
+    max-width: 68%;
+  }
+}
+
+/* Desktop scaling for report page */
+@media (min-width: 992px) {
+  .mobile-app-shell {
+    max-width: 440px;
+  }
+
+  .mobile-app-header {
+    border-radius: 0 0 1.75rem 1.75rem;
+  }
+
+  .mobile-app-shell main {
+    max-width: 420px;
+    margin: 0 auto;
+    padding-top: 1.5rem !important;
+    padding-bottom: 1.8rem !important;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .report-headerbar {
+    justify-content: stretch;
+  }
+
+  .report-track-btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .mobile-app-shell .needs-validation {
+    width: 100%;
+    max-width: 680px;
+  }
+
+  .mobile-card .card-body {
+    padding: 1.2rem 1.35rem !important;
+  }
+
+  .btn-mobile-lg {
+    min-height: 2.75rem;
+    font-size: 0.95rem;
+  }
+
+  .btn-mobile-secondary {
+    min-height: 2.45rem;
+    font-size: 0.9rem;
+  }
+}
+
+/* Admin dashboard */
+.admin-sidebar {
+  min-height: 100vh;
+  background: #0f172a;
+  color: #e2e8f0;
+}
+
+.admin-sidebar .nav-link {
+  color: #94a3b8;
+  border-radius: 0.5rem;
+  padding: 0.65rem 1rem;
+}
+
+.admin-sidebar .nav-link:hover {
+  color: #f8fafc;
+  background: rgba(148, 163, 184, 0.12);
+}
+
+.admin-sidebar .nav-link.active {
+  color: #fff;
+  background: rgba(45, 212, 191, 0.15);
+  border-left: 3px solid #2dd4bf;
+}
+
+.admin-main {
+  background: #f1f5f9;
+  min-height: 100vh;
+}
+
+.admin-topnav .nav-link {
+  color: #475569;
+  padding: 0.75rem 1.25rem;
+  border-radius: 0.5rem;
+}
+
+.admin-topnav .nav-link:hover {
+  background: #e2e8f0;
+  color: #0f172a;
+}
+
+.admin-topnav .nav-link.active {
+  background: #0f172a;
+  color: #fff;
+}
+
+.admin-stat-card {
+  border: none;
+  border-radius: 0.75rem;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.08);
+}
+
+.table-admin thead {
+  background: #f8fafc;
+}

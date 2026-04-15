@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<aside th:fragment="sidebar" class="admin-sidebar col-12 col-md-3 col-lg-2 p-0 d-flex flex-column">
+  <div class="p-4 border-bottom border-secondary border-opacity-25">
+    <div class="d-flex align-items-center gap-2">
+      <span class="rounded-circle d-inline-flex align-items-center justify-content-center"
+            style="width: 40px; height: 40px; background-color: #14b8a6;">
+        <i class="bi bi-recycle text-white fs-5"></i>
+      </span>
+      <div>
+        <div class="fw-bold text-white small">WasteOps</div>
+        <div class="text-secondary small" style="font-size: 0.7rem;">Admin Console</div>
+      </div>
+    </div>
+  </div>
+  <nav class="nav flex-column p-3 gap-1 flex-grow-1">
+    <a class="nav-link" th:classappend="${activeSection == 'pending'} ? ' active'" th:href="@{/admin/pending}">
+      <i class="bi bi-hourglass-split me-2"></i> Pending queue
+    </a>
+    <a class="nav-link" th:classappend="${activeSection == 'resolved'} ? ' active'" th:href="@{/admin/resolved}">
+      <i class="bi bi-check2-circle me-2"></i> Resolved tasks
+    </a>
+    <a class="nav-link" th:classappend="${activeSection == 'users'} ? ' active'" th:href="@{/admin/users}">
+      <i class="bi bi-people me-2"></i> Users
+    </a>
+  </nav>
+  <div class="p-3 small text-secondary border-top border-secondary border-opacity-25">
+    <a th:href="@{/report}" class="text-decoration-none text-secondary">
+      <i class="bi bi-phone me-1"></i> User app
+    </a>
+  </div>
+</aside>
+</body>
+</html>

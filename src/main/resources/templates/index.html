@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Home</title>
+  <style>
+    html, body { height: 100%; margin: 0; overflow: hidden; }
+    body { background: #ffffff; font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; }
+    .shell {
+      min-height: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      padding: 22px 18px;
+      box-sizing: border-box;
+    }
+    .hero {
+      width: 100%;
+      max-width: 720px;
+      display: grid;
+      place-items: center;
+      margin-top: 0;
+    }
+    .hero img {
+      width: 100%;
+      max-width: 390px; /* slightly smaller on desktop too */
+      height: auto;
+      border-radius: 0; /* plain image */
+      box-shadow: none; /* no 3D/elevation */
+      background: #ffffff; /* keep it plain */
+      margin-top: -52px; /* closer to android-like placement */
+    }
+    .actions {
+      width: 100%;
+      max-width: 300px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-top: 14px; /* move button section slightly down */
+    }
+    .btn-primary {
+      appearance: none;
+      border: 0;
+      width: 100%;
+      min-height: 34px;
+      padding: 6px 10px;
+      border-radius: 9px;
+      font-size: 12.5px;
+      font-weight: 700;
+      letter-spacing: 0.2px;
+      color: #fff;
+      background: #0f766e; /* flat, premium teal */
+      box-shadow: none; /* keep it flat */
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      margin-top: 24px;
+    }
+    .btn-primary:hover { background: #115e59; }
+    .btn-primary:active { background: #0f766e; transform: none; }
+    .subtle {
+      margin: 42px 0 0;
+      color: #64748b;
+      font-size: 13px;
+      text-align: center;
+      line-height: 1.35;
+    }
+    .meta-links {
+      margin-top: 44px;
+      display: flex;
+      gap: 14px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    .text-btn {
+      border: 0;
+      background: transparent;
+      color: #0f766e;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      padding: 2px 4px;
+      text-decoration: underline;
+      text-underline-offset: 3px;
+    }
+    .text-btn:hover { color: #115e59; }
+
+    .popup-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.24);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      z-index: 30;
+    }
+    .popup-backdrop.open { display: flex; }
+    .popup {
+      width: min(360px, 92vw);
+      background: #ffffff;
+      border-radius: 12px;
+      border: 1px solid #e2e8f0;
+      padding: 14px;
+      transform: translateY(10px) scale(0.98);
+      opacity: 0;
+      transition: transform 180ms ease, opacity 180ms ease;
+    }
+    .popup-backdrop.open .popup {
+      transform: translateY(0) scale(1);
+      opacity: 1;
+    }
+    .popup h3 {
+      margin: 0 0 8px;
+      font-size: 14px;
+      color: #0f172a;
+    }
+    .popup p {
+      margin: 0;
+      font-size: 12.5px;
+      line-height: 1.4;
+      color: #475569;
+    }
+    .popup-close {
+      margin-top: 12px;
+      width: 100%;
+      min-height: 34px;
+      border: 0;
+      border-radius: 8px;
+      background: #0f766e;
+      color: #fff;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .popup-close:hover { background: #115e59; }
+
+    .auth-backdrop {
+      position: fixed;
+      inset: 0;
+      background: radial-gradient(circle at top, rgba(15, 23, 42, 0.22), rgba(2, 6, 23, 0.58));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 40;
+      padding: 16px;
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+      transition: opacity 240ms ease, visibility 240ms ease;
+      backdrop-filter: blur(2px);
+    }
+    .auth-backdrop.open {
+      opacity: 1;
+      visibility: visible;
+      pointer-events: auto;
+    }
+    .auth-modal {
+      width: min(430px, 94vw);
+      background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+      border: 1px solid #e2e8f0;
+      border-radius: 18px;
+      box-shadow: 0 24px 55px rgba(15, 23, 42, 0.28);
+      padding: 24px 22px 20px;
+      text-align: center;
+      transform: translateY(14px) scale(0.98);
+      opacity: 0;
+      transition: transform 240ms cubic-bezier(.2, .8, .2, 1), opacity 240ms ease;
+    }
+    .auth-backdrop.open .auth-modal {
+      transform: translateY(0) scale(1);
+      opacity: 1;
+    }
+    .auth-badge {
+      width: 52px;
+      height: 52px;
+      margin: 0 auto 14px;
+      border-radius: 50%;
+      border: 1.5px solid #94a3b8;
+      color: #0f766e;
+      font-size: 0;
+      display: grid;
+      place-items: center;
+      background: transparent;
+      box-shadow: none;
+    }
+    .auth-badge svg {
+      width: 22px;
+      height: 22px;
+      stroke: currentColor;
+      fill: none;
+      stroke-width: 1.9;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+    .auth-modal h3 {
+      margin: 0;
+      font-size: 18px;
+      font-weight: 800;
+      color: #0f172a;
+      letter-spacing: 0.01em;
+    }
+    .auth-modal p {
+      margin: 10px 0 18px;
+      font-size: 13px;
+      color: #475569;
+      line-height: 1.5;
+    }
+    .google-btn-wrap {
+      display: flex;
+      justify-content: center;
+      min-height: 42px;
+      margin-top: 2px;
+    }
+    .google-sign-btn {
+      min-height: 42px;
+      border: 1px solid #cbd5e1;
+      background: #ffffff;
+      color: #0f172a;
+      border-radius: 999px;
+      font-size: 13px;
+      font-weight: 700;
+      padding: 0 16px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      box-shadow: 0 3px 10px rgba(15, 23, 42, 0.08);
+      transition: all 160ms ease;
+    }
+    .google-sign-btn:hover {
+      background: #f8fafc;
+      border-color: #94a3b8;
+      transform: translateY(-1px);
+      box-shadow: 0 8px 18px rgba(15, 23, 42, 0.15);
+    }
+    .google-sign-btn:disabled {
+      opacity: 0.7;
+      cursor: not-allowed;
+    }
+    .auth-status {
+      margin-top: 14px;
+      font-size: 12px;
+      color: #dc2626;
+      min-height: 20px;
+    }
+
+    /* Android / small screens */
+    @media (max-width: 380px) {
+      .shell { padding: 22px 14px; gap: 16px; }
+      .hero img { max-width: 340px; margin-top: -46px; }
+      .actions { max-width: 280px; margin: 10px auto 0; }
+      .btn-primary { min-height: 32px; padding: 6px 8px; font-size: 12px; margin-top: 28px; }
+      .subtle { margin-top: 52px; }
+      .meta-links { gap: 10px; margin-top: 56px; }
+    }
+  </style>
+</head>
+<body>
+<main class="shell">
+  <div class="hero">
+    <img src="/assets/trendy-send-request-vector.jpg" alt="Send request"/>
+  </div>
+
+  <div class="actions">
+    <button class="btn-primary" type="button" id="sendRequestBtn">
+      <span>Send request</span>
+      <span aria-hidden="true" style="font-size: 18px;">→</span>
+    </button>
+    <p class="subtle">Report waste quickly from your phone. Admin can review and resolve in the dashboard.</p>
+    <div class="meta-links">
+      <button class="text-btn" type="button" data-popup="terms">Terms &amp; Conditions</button>
+      <button class="text-btn" type="button" data-popup="privacy">Privacy Policy</button>
+    </div>
+  </div>
+</main>
+
+<div class="popup-backdrop" id="infoPopup" role="dialog" aria-modal="true" aria-labelledby="popupTitle">
+  <div class="popup">
+    <h3 id="popupTitle">Info</h3>
+    <p id="popupBody"></p>
+    <button type="button" class="popup-close" id="closePopup">Close</button>
+  </div>
+</div>
+
+<div class="auth-backdrop" id="authModal" role="dialog" aria-modal="true" aria-labelledby="authTitle">
+  <div class="auth-modal">
+    <div class="auth-badge" aria-hidden="true">
+      <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+        <path d="M8 10V7a4 4 0 0 1 8 0v3"></path>
+        <rect x="5" y="10" width="14" height="10" rx="2"></rect>
+        <circle cx="12" cy="15" r="1"></circle>
+      </svg>
+    </div>
+    <h3 id="authTitle">Sign in to continue</h3>
+    <p>Please sign in with Google to submit your waste report securely.</p>
+    <div class="google-btn-wrap">
+      <button type="button" class="google-sign-btn" id="googleSignInBtn">
+        <span aria-hidden="true">G</span>
+        <span>Continue with Google</span>
+      </button>
+    </div>
+    <div class="auth-status" id="authStatus"></div>
+  </div>
+</div>
+
+<script th:inline="javascript">
+  window.APP_AUTH = {
+    isLoggedIn: /*[[${isLoggedIn}]]*/ false
+  };
+</script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script th:inline="javascript">
+  (function () {
+    const authConfig = window.APP_AUTH || { isLoggedIn: false };
+    const sendBtn = document.getElementById('sendRequestBtn');
+    const authModal = document.getElementById('authModal');
+    const authStatus = document.getElementById('authStatus');
+    const googleSignInBtn = document.getElementById('googleSignInBtn');
+    const firebaseConfig = {
+      apiKey: "AIzaSyDNjMu37XLYU14hX-CD1yHEeCZl0xmhOeQ",
+      authDomain: "waste-m-705e5.firebaseapp.com",
+      projectId: "waste-m-705e5",
+      storageBucket: "waste-m-705e5.firebasestorage.app",
+      messagingSenderId: "818126959831",
+      appId: "1:818126959831:web:151b66ab27788a2460ac92",
+      measurementId: "G-7BX5X9FT80"
+    };
+    let firebaseReady = false;
+
+    const popup = document.getElementById('infoPopup');
+    const title = document.getElementById('popupTitle');
+    const body = document.getElementById('popupBody');
+    const closeBtn = document.getElementById('closePopup');
+    const content = {
+      terms: {
+        title: 'Terms & Conditions',
+        body: 'Please submit only genuine waste reports with clear details and location data. Repeated fake or abusive submissions may be blocked to keep the platform useful for local cleanup teams.'
+      },
+      privacy: {
+        title: 'Privacy Policy',
+        body: 'We store only the information needed to process your waste report, such as description, photo, and coordinates. This data is used for cleanup workflow and admin tracking within the system.'
+      }
+    };
+
+    document.querySelectorAll('[data-popup]').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        const key = btn.getAttribute('data-popup');
+        const item = content[key];
+        if (!item) return;
+        title.textContent = item.title;
+        body.textContent = item.body;
+        popup.classList.add('open');
+      });
+    });
+
+    function closePopup() {
+      popup.classList.remove('open');
+    }
+
+    closeBtn.addEventListener('click', closePopup);
+    popup.addEventListener('click', function (e) {
+      if (e.target === popup) closePopup();
+    });
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape') closePopup();
+    });
+
+    function setAuthStatus(message) {
+      authStatus.textContent = message || '';
+    }
+
+    function closeAuthModal() {
+      authModal.classList.remove('open');
+      setAuthStatus('');
+      googleSignInBtn.disabled = false;
+    }
+
+    async function submitTokenToBackend(idToken) {
+      setAuthStatus('Signing in...');
+      try {
+        const loginResponse = await fetch('/auth/firebase-login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ idToken: idToken })
+        });
+        if (!loginResponse.ok) {
+          let message = 'Unable to sign in. Please try again.';
+          try {
+            const data = await loginResponse.json();
+            if (data && data.message) message = data.message;
+          } catch (ignored) {}
+          throw new Error(message);
+        }
+        // Keep user on home after login; Send request will redirect if needed.
+        window.location.href = '/';
+      } catch (err) {
+        setAuthStatus(err.message || 'Sign in failed. Please try again.');
+      }
+    }
+
+    function initFirebaseAuth() {
+      if (firebaseReady) return true;
+      if (!window.firebase || !window.firebase.initializeApp || !window.firebase.auth) {
+        setAuthStatus('Firebase auth is still loading. Please try again.');
+        return false;
+      }
+      if (!window.firebase.apps || window.firebase.apps.length === 0) {
+        window.firebase.initializeApp(firebaseConfig);
+      }
+      firebaseReady = true;
+      return true;
+    }
+
+    async function signInWithGoogle() {
+      if (!initFirebaseAuth()) return;
+      try {
+        googleSignInBtn.disabled = true;
+        setAuthStatus('');
+        const provider = new window.firebase.auth.GoogleAuthProvider();
+        const result = await window.firebase.auth().signInWithPopup(provider);
+        const idToken = await result.user.getIdToken(true);
+        await submitTokenToBackend(idToken);
+      } catch (err) {
+        setAuthStatus('Google sign-in failed. Please try again.');
+        googleSignInBtn.disabled = false;
+      }
+    }
+
+    function openAuthModal() {
+      authModal.classList.add('open');
+      setAuthStatus('');
+    }
+
+    if (sendBtn) {
+      sendBtn.addEventListener('click', function () {
+        fetch('/auth/session', { method: 'GET', credentials: 'same-origin' })
+          .then(function (res) { return res.ok ? res.json() : { loggedIn: false }; })
+          .then(function (data) {
+            if (data && data.loggedIn) {
+              window.location.href = '/report';
+              return;
+            }
+            openAuthModal();
+          })
+          .catch(function () {
+            if (authConfig.isLoggedIn) {
+              window.location.href = '/report';
+              return;
+            }
+            openAuthModal();
+          });
+      });
+    }
+
+    authModal.addEventListener('click', function (e) {
+      if (e.target === authModal) closeAuthModal();
+    });
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && authModal.classList.contains('open')) closeAuthModal();
+    });
+    googleSignInBtn.addEventListener('click', signInWithGoogle);
+  })();
+</script>
+</body>
+</html>

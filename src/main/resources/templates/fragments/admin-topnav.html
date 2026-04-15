@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<nav th:fragment="topnav" class="admin-topnav navbar navbar-expand-lg bg-white border-bottom shadow-sm px-4 py-2">
+  <div class="container-fluid">
+    <span class="navbar-text text-muted small d-none d-sm-inline me-3">Reports overview</span>
+    <ul class="navbar-nav flex-row gap-1 ms-auto align-items-center">
+      <li class="nav-item">
+        <a class="nav-link"
+           th:classappend="${activeSection == 'pending'} ? ' active'"
+           th:href="@{/admin/pending}">Pending Reports</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link"
+           th:classappend="${activeSection == 'resolved'} ? ' active'"
+           th:href="@{/admin/resolved}">Resolved Tasks</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link"
+           th:classappend="${activeSection == 'users'} ? ' active'"
+           th:href="@{/admin/users}">Users</a>
+      </li>
+      <li class="nav-item ms-2">
+        <form th:action="@{/admin/clear-all}" method="post" class="d-inline"
+              onsubmit="return confirm('Clear ALL reports and uploaded images? This cannot be undone.');">
+          <button type="submit" class="btn btn-sm btn-outline-danger">
+            Clear all data
+          </button>
+        </form>
+      </li>
+    </ul>
+  </div>
+</nav>
+</body>
+</html>

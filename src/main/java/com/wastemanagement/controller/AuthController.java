@@ -1,9 +1,7 @@
 package com.wastemanagement.controller;
 
-import com.google.firebase.auth.FirebaseAuthException;
-import com.wastemanagement.service.AuthenticatedUser;
+import com.wastemanagement.model.AppUser;
 import com.wastemanagement.service.AppUserService;
-import com.wastemanagement.service.FirebaseAuthService;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -19,27 +17,40 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class AuthController {
 
-    private final FirebaseAuthService firebaseAuthService;
     private final AppUserService appUserService;
 
-    @PostMapping("/auth/firebase-login")
-    public ResponseEntity<Map<String, String>> login(@RequestBody Map<String, String> payload, HttpSession session) {
-        String idToken = payload.get("idToken");
-        if (!StringUtils.hasText(idToken)) {
-            return ResponseEntity.badRequest().body(Map.of("message", "Missing ID token."));
-        }
-
+    @PostMapping("/auth/signup")
+    public ResponseEntity<Map<String, String>> signup(@RequestBody Map<String, String> payload, HttpSession session) {
         try {
-            AuthenticatedUser user = firebaseAuthService.verifyIdToken(idToken);
-            session.setAttribute("firebaseUid", user.uid());
-            session.setAttribute("userEmail", user.email());
-            session.setAttribute("userName", user.name());
-            appUserService.upsertLogin(user);
-            return ResponseEntity.ok(Map.of("message", "Login successful."));
-        } catch (FirebaseAuthException ex) {
-            return ResponseEntity.status(401).body(Map.of("message", "Invalid sign-in token."));
+            AppUser user = appUserService.register(
+                    payload.get("name"),
+                    payload.get("email"),
+                    payload.get("password")
+            );
+            setSessionUser(session, user);
+            return ResponseEntity.ok(Map.of("message", "Signup successful."));
+        } catch (IllegalArgumentException ex) {
+            return ResponseEntity.badRequest().body(Map.of("message", ex.getMessage()));
         } catch (Exception ex) {
-            return ResponseEntity.internalServerError().body(Map.of("message", "Sign-in configuration is incomplete."));
+            return ResponseEntity.internalServerError().body(Map.of("message", "Unable to create account."));
+        }
+    }
+
+    @PostMapping("/auth/login")
+    public ResponseEntity<Map<String, String>> login(@RequestBody Map<String, String> payload, HttpSession session) {
+        String email = payload.get("email");
+        String password = payload.get("password");
+        if (!StringUtils.hasText(email) || !StringUtils.hasText(password)) {
+            return ResponseEntity.badRequest().body(Map.of("message", "Email and password are required."));
+        }
+        try {
+            AppUser user = appUserService.login(email, password);
+            setSessionUser(session, user);
+            return ResponseEntity.ok(Map.of("message", "Login successful."));
+        } catch (IllegalArgumentException ex) {
+            return ResponseEntity.status(401).body(Map.of("message", ex.getMessage()));
+        } catch (Exception ex) {
+            return ResponseEntity.internalServerError().body(Map.of("message", "Unable to login now."));
         }
     }
 
@@ -51,7 +62,17 @@ public class AuthController {
 
     @GetMapping("/auth/session")
     public Map<String, Object> session(HttpSession session) {
-        boolean loggedIn = session.getAttribute("userEmail") != null;
-        return Map.of("loggedIn", loggedIn);
+        String email = (String) session.getAttribute("userEmail");
+        String name = (String) session.getAttribute("userName");
+        return Map.of(
+                "loggedIn", email != null,
+                "userEmail", email == null ? "" : email,
+                "userName", name == null ? "" : name
+        );
+    }
+
+    private void setSessionUser(HttpSession session, AppUser user) {
+        session.setAttribute("userEmail", user.getEmail());
+        session.setAttribute("userName", StringUtils.hasText(user.getName()) ? user.getName() : user.getEmail());
     }
 }

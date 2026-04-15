@@ -213,35 +213,57 @@
       color: #475569;
       line-height: 1.5;
     }
-    .google-btn-wrap {
+    .auth-tabs {
       display: flex;
-      justify-content: center;
-      min-height: 42px;
-      margin-top: 2px;
+      gap: 8px;
+      margin-bottom: 12px;
     }
-    .google-sign-btn {
-      min-height: 42px;
+    .auth-tab {
+      flex: 1;
       border: 1px solid #cbd5e1;
-      background: #ffffff;
-      color: #0f172a;
       border-radius: 999px;
+      min-height: 36px;
+      background: #fff;
+      color: #334155;
+      font-size: 12.5px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .auth-tab.active {
+      background: #0f766e;
+      border-color: #0f766e;
+      color: #fff;
+    }
+    .auth-form {
+      text-align: left;
+      display: grid;
+      gap: 10px;
+    }
+    .auth-form input {
+      width: 100%;
+      box-sizing: border-box;
+      min-height: 38px;
+      border: 1px solid #cbd5e1;
+      border-radius: 9px;
+      padding: 8px 10px;
+      font-size: 13px;
+      outline: none;
+    }
+    .auth-form input:focus {
+      border-color: #0f766e;
+      box-shadow: 0 0 0 3px rgba(15, 118, 110, 0.12);
+    }
+    .auth-submit {
+      min-height: 40px;
+      border: 0;
+      border-radius: 9px;
+      background: #0f766e;
+      color: #fff;
       font-size: 13px;
       font-weight: 700;
-      padding: 0 16px;
       cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      box-shadow: 0 3px 10px rgba(15, 23, 42, 0.08);
-      transition: all 160ms ease;
     }
-    .google-sign-btn:hover {
-      background: #f8fafc;
-      border-color: #94a3b8;
-      transform: translateY(-1px);
-      box-shadow: 0 8px 18px rgba(15, 23, 42, 0.15);
-    }
-    .google-sign-btn:disabled {
+    .auth-submit:disabled {
       opacity: 0.7;
       cursor: not-allowed;
     }
@@ -300,12 +322,16 @@
       </svg>
     </div>
     <h3 id="authTitle">Sign in to continue</h3>
-    <p>Please sign in with Google to submit your waste report securely.</p>
-    <div class="google-btn-wrap">
-      <button type="button" class="google-sign-btn" id="googleSignInBtn">
-        <span aria-hidden="true">G</span>
-        <span>Continue with Google</span>
-      </button>
+    <p>Create an account or login to submit and track your waste reports.</p>
+    <div class="auth-tabs">
+      <button type="button" class="auth-tab active" id="loginTab">Login</button>
+      <button type="button" class="auth-tab" id="signupTab">Sign up</button>
+    </div>
+    <div class="auth-form">
+      <input id="authName" type="text" placeholder="Full name (signup only)" style="display: none;"/>
+      <input id="authEmail" type="email" placeholder="Email address" autocomplete="email"/>
+      <input id="authPassword" type="password" placeholder="Password" autocomplete="current-password"/>
+      <button type="button" class="auth-submit" id="authSubmitBtn">Login</button>
     </div>
     <div class="auth-status" id="authStatus"></div>
   </div>
@@ -316,25 +342,19 @@
     isLoggedIn: /*[[${isLoggedIn}]]*/ false
   };
 </script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script th:inline="javascript">
   (function () {
-    const authConfig = window.APP_AUTH || { isLoggedIn: false };
+    const authConfig = window.APP_AUTH || {isLoggedIn: false};
     const sendBtn = document.getElementById('sendRequestBtn');
     const authModal = document.getElementById('authModal');
     const authStatus = document.getElementById('authStatus');
-    const googleSignInBtn = document.getElementById('googleSignInBtn');
-    const firebaseConfig = {
-      apiKey: "AIzaSyDNjMu37XLYU14hX-CD1yHEeCZl0xmhOeQ",
-      authDomain: "waste-m-705e5.firebaseapp.com",
-      projectId: "waste-m-705e5",
-      storageBucket: "waste-m-705e5.firebasestorage.app",
-      messagingSenderId: "818126959831",
-      appId: "1:818126959831:web:151b66ab27788a2460ac92",
-      measurementId: "G-7BX5X9FT80"
-    };
-    let firebaseReady = false;
+    const authSubmitBtn = document.getElementById('authSubmitBtn');
+    const loginTab = document.getElementById('loginTab');
+    const signupTab = document.getElementById('signupTab');
+    const nameInput = document.getElementById('authName');
+    const emailInput = document.getElementById('authEmail');
+    const passwordInput = document.getElementById('authPassword');
+    let mode = 'login';
 
     const popup = document.getElementById('infoPopup');
     const title = document.getElementById('popupTitle');
@@ -381,16 +401,39 @@
     function closeAuthModal() {
       authModal.classList.remove('open');
       setAuthStatus('');
-      googleSignInBtn.disabled = false;
+      authSubmitBtn.disabled = false;
     }
 
-    async function submitTokenToBackend(idToken) {
-      setAuthStatus('Signing in...');
+    function switchMode(nextMode) {
+      mode = nextMode;
+      const loginMode = nextMode === 'login';
+      loginTab.classList.toggle('active', loginMode);
+      signupTab.classList.toggle('active', !loginMode);
+      nameInput.style.display = loginMode ? 'none' : 'block';
+      authSubmitBtn.textContent = loginMode ? 'Login' : 'Sign up';
+      passwordInput.setAttribute('autocomplete', loginMode ? 'current-password' : 'new-password');
+      setAuthStatus('');
+    }
+
+    async function submitAuth() {
+      const payload = {
+        email: emailInput.value.trim(),
+        password: passwordInput.value
+      };
+      if (mode === 'signup') {
+        payload.name = nameInput.value.trim();
+      }
+      if (!payload.email || !payload.password || (mode === 'signup' && !payload.name)) {
+        setAuthStatus('Please fill all required fields.');
+        return;
+      }
+      authSubmitBtn.disabled = true;
+      setAuthStatus(mode === 'signup' ? 'Creating account...' : 'Signing in...');
       try {
-        const loginResponse = await fetch('/auth/firebase-login', {
+        const loginResponse = await fetch(mode === 'signup' ? '/auth/signup' : '/auth/login', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ idToken: idToken })
+          body: JSON.stringify(payload)
         });
         if (!loginResponse.ok) {
           let message = 'Unable to sign in. Please try again.';
@@ -400,38 +443,10 @@
           } catch (ignored) {}
           throw new Error(message);
         }
-        // Keep user on home after login; Send request will redirect if needed.
-        window.location.href = '/';
+        window.location.href = '/report';
       } catch (err) {
         setAuthStatus(err.message || 'Sign in failed. Please try again.');
-      }
-    }
-
-    function initFirebaseAuth() {
-      if (firebaseReady) return true;
-      if (!window.firebase || !window.firebase.initializeApp || !window.firebase.auth) {
-        setAuthStatus('Firebase auth is still loading. Please try again.');
-        return false;
-      }
-      if (!window.firebase.apps || window.firebase.apps.length === 0) {
-        window.firebase.initializeApp(firebaseConfig);
-      }
-      firebaseReady = true;
-      return true;
-    }
-
-    async function signInWithGoogle() {
-      if (!initFirebaseAuth()) return;
-      try {
-        googleSignInBtn.disabled = true;
-        setAuthStatus('');
-        const provider = new window.firebase.auth.GoogleAuthProvider();
-        const result = await window.firebase.auth().signInWithPopup(provider);
-        const idToken = await result.user.getIdToken(true);
-        await submitTokenToBackend(idToken);
-      } catch (err) {
-        setAuthStatus('Google sign-in failed. Please try again.');
-        googleSignInBtn.disabled = false;
+        authSubmitBtn.disabled = false;
       }
     }
 
@@ -467,7 +482,18 @@
     document.addEventListener('keydown', function (e) {
       if (e.key === 'Escape' && authModal.classList.contains('open')) closeAuthModal();
     });
-    googleSignInBtn.addEventListener('click', signInWithGoogle);
+    loginTab.addEventListener('click', function () { switchMode('login'); });
+    signupTab.addEventListener('click', function () { switchMode('signup'); });
+    authSubmitBtn.addEventListener('click', submitAuth);
+    passwordInput.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter') submitAuth();
+    });
+    emailInput.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter') submitAuth();
+    });
+    nameInput.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter') submitAuth();
+    });
   })();
 </script>
 </body>

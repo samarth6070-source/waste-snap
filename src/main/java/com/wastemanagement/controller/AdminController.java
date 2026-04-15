@@ -74,8 +74,20 @@ public class AdminController {
             int total = stats != null ? stats.totalReports : 0;
             int pending = stats != null ? stats.pendingReports : 0;
             int resolved = stats != null ? stats.resolvedReports : 0;
-            return new UserRow(u.getEmail(), displayName, total, pending, resolved, u.getLastLoginAt(), stats != null ? stats.lastReportAt : null);
-        }).toList();
+            return new UserRow(
+                    u.getEmail(),
+                    displayName,
+                    total,
+                    pending,
+                    resolved,
+                    u.getCreatedAt(),
+                    u.getLastLoginAt(),
+                    stats != null ? stats.lastReportAt : null
+            );
+        }).stream().sorted(Comparator
+                .comparing(UserRow::lastLoginAt, Comparator.nullsLast(Comparator.reverseOrder()))
+                .thenComparing(UserRow::createdAt, Comparator.nullsLast(Comparator.reverseOrder()))
+        ).toList();
 
         model.addAttribute("users", rows);
         model.addAttribute("activeSection", "users");
@@ -117,6 +129,7 @@ public class AdminController {
             int totalReports,
             int pendingReports,
             int resolvedReports,
+            LocalDateTime createdAt,
             LocalDateTime lastLoginAt,
             LocalDateTime lastReportAt
     ) {

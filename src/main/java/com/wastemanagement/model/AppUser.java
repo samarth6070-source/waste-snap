@@ -21,8 +21,9 @@ public class AppUser {
 
     private String email;
     private String name;
-    private String firebaseUid;
+    private String passwordHash;
 
+    private LocalDateTime createdAt;
     private LocalDateTime lastLoginAt;
 }
 
